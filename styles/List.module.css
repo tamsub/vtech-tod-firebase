@@ -1,0 +1,9 @@
+.isCompleted{
+    text-decoration: line-through;
+}
+.isNotCompleted{
+    text-decoration: none;
+}
+.listContainer{
+    display: flex;
+}
