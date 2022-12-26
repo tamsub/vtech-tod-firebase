@@ -15,7 +15,7 @@ const List = ({
 	};
 
 	const handleRemove = () => {
-		handleRemoveList(list.id);
+		handleRemoveList(list._id);
 	};
 
 	const handleEdit = () => {

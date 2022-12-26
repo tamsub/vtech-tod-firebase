@@ -12,6 +12,10 @@
     "@next/font": "13.0.7",
     "next": "13.0.7",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "mongoose": "^6.8.1"
   }
 }
