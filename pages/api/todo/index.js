@@ -27,8 +27,8 @@ export default async function handler(req, res) {
 
 	switch (method) {
 		case "GET":
-			getTodos(req, res);
-			// res.status(202).json(todo);
+			// getTodos(req, res);
+			res.status(202).json(todo);
 			break;
 		case "POST":
 			postTodo(req, res);

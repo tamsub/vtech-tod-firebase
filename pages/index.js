@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import List from "../components/list";
 import * as Helpers from "../lib/helper.js";
 
+import TodoContext from "../context/todoContext";
+
 export default function Home(props) {
-	const [lists, setLists] = useState([]);
 	const [list, setList] = useState("");
 	const inputRef = useRef();
-	const editIdRef = useRef();
-	const isCompletedRef = useRef();
+	const listEditRef = useRef();
+
+	const value = useContext(TodoContext);
+	const { todos, setTodos } = value;
 
 	const handleList = (e) => {
 		const value = e.target.value;
@@ -17,28 +20,17 @@ export default function Home(props) {
 	};
 
 	const clearEditID = () => {
-		editIdRef.current = "";
-	};
-
-	const handleFetchTodos = async () => {
-		const todos = await Helpers.getAllTodos();
-		return todos;
+		listEditRef.current = "";
 	};
 
 	const handleEnterKeyDown = async (e) => {
 		if (e.code !== "Enter") return;
 		const validatedTodo = vaildateTodo(list);
 		if (!validatedTodo) return clearEditID();
-		let newLists;
-		if (editIdRef.current) {
-			const editTodo = lists.find((item) => item._id == editIdRef.current);
-			const response = await Helpers.editTodo({ ...editTodo, todo: list });
-			newLists = lists.map((item) => {
-				if (item._id == editIdRef.current) {
-					return { ...item, todo: list };
-				}
-				return item;
-			});
+		const listEdit = listEditRef.current;
+		if (listEdit) {
+			Helpers.editTodo({ ...listEdit, todo: list });
+			listEditRef.current = null;
 		} else {
 			const newList = {
 				_id: uuidv4(),
@@ -47,9 +39,7 @@ export default function Home(props) {
 				createdAt: Date.now(),
 			};
 			const result = await Helpers.createTodo(newList);
-			newLists = lists.concat(result);
 		}
-		setLists(newLists);
 		clearEditID();
 		clearInput();
 	};
@@ -64,7 +54,7 @@ export default function Home(props) {
 			return false;
 		}
 
-		const isExist = lists.find((list) => {
+		const isExist = todos.find((list) => {
 			return list.todo.toLowerCase() == todo.toLowerCase();
 		});
 		if (isExist) {
@@ -74,46 +64,35 @@ export default function Home(props) {
 	};
 
 	const handleInitialTodos = async () => {
-		const initialTodos = await handleFetchTodos().then((data) => data);
-		setLists(initialTodos);
+		Helpers.getAllTodos(setTodos);
 	};
 
 	const handleRemoveList = async (id) => {
-		const response = await Helpers.removeTodo(id);
-		if (!response) return;
-		const newLists = lists.filter((list) => {
-			return list._id !== id;
-		});
-		setLists(newLists);
+		Helpers.removeTodo(id);
 	};
 
 	const handleEditList = async (list) => {
 		inputRef.current.value = list.todo;
 		inputRef.current.focus();
-		editIdRef.current = list._id;
+		listEditRef.current = list;
 
 		setList(list.todo);
 	};
 
 	const handleCompletedList = async (list) => {
-		const result = await Helpers.editTodo(list);
-		const newLists = lists.map((item) => {
-			if (list._id == item._id) return list;
-			else return item;
-		});
-		if (result) setLists(newLists);
+		Helpers.editTodo(list);
 	};
 
 	const filterLists = () => {
 		let filteredLists;
-		if (!lists.length > 0) return [];
+		if (!todos.length > 0) return [];
 		if (list) {
-			filteredLists = lists.filter((item) => {
+			filteredLists = todos.filter((item) => {
 				if (item.todo.includes(list)) {
 					return true;
 				}
 			});
-		} else filteredLists = lists;
+		} else filteredLists = todos;
 		return filteredLists;
 	};
 
